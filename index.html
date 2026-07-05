@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documents et cours de lycée</title>
+    <meta name="theme-color" content="#0f766e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Docs Lycée" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <link rel="stylesheet" href="styles.css?v=47" />
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+    <script src="app.js?v=47" defer></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">2ème sciences</p>
+        <h1>Programme 2ème sciences</h1>
+        <span class="app-version" id="appVersion"></span>
+      </div>
+      <div class="header-actions">
+        <div class="language-switch" aria-label="Langue">
+          <button class="language-option active" type="button" data-language="fr" aria-pressed="true">FR</button>
+          <button class="language-option" type="button" data-language="ar" aria-pressed="false">عربي</button>
+        </div>
+        <button class="install-button" id="installApp" type="button" hidden>
+          <i data-lucide="download"></i>
+          Installer
+        </button>
+        <button class="icon-button" id="exportBackup" type="button" title="Exporter l'index">
+          <i data-lucide="archive"></i>
+        </button>
+        <button class="icon-button" id="clearFilters" type="button" title="Réinitialiser">
+          <i data-lucide="rotate-ccw"></i>
+        </button>
+      </div>
+    </header>
+
+    <nav class="app-nav" id="appNav" aria-label="Navigation principale">
+      <button class="app-nav-tab active" type="button" data-app-view="programme">
+        <i data-lucide="graduation-cap"></i>
+        <span>Programme</span>
+      </button>
+      <button class="app-nav-tab" type="button" data-app-view="documents">
+        <i data-lucide="folder"></i>
+        <span>Mes documents</span>
+      </button>
+    </nav>
+
+    <main>
+      <section class="stats-band" aria-label="Résumé">
+        <article>
+          <span id="docCount">0</span>
+          <p>documents</p>
+        </article>
+        <article>
+          <span id="totalSize">0 Mo</span>
+          <p>stockés</p>
+        </article>
+        <article>
+          <span id="subjectCount">0</span>
+          <p>matières</p>
+        </article>
+      </section>
+
+      <section class="subject-band" aria-label="Matières">
+        <div class="section-heading">
+          <div>
+            <h2>Matières</h2>
+            <p id="visibleCount">0 cours affiché</p>
+          </div>
+          <div class="subject-actions">
+            <button class="secondary-button" id="addSubjectQuick" type="button">
+              <i data-lucide="book-plus"></i>
+              Ajouter une matière
+            </button>
+            <button class="secondary-button danger-lite-button" id="deleteSubjectButton" type="button">
+              <i data-lucide="trash-2"></i>
+              Supprimer une matière
+            </button>
+          </div>
+        </div>
+        <div class="subject-pills" id="subjectQuickFilters"></div>
+      </section>
+
+      <section class="study-hub" id="studyHub" aria-label="Livres et cours">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow-light">Programme officiel Tunisie</p>
+            <h2>Programme : matières, chapitres et exercices</h2>
+          </div>
+          <div class="study-tabs" aria-label="Choix du contenu">
+            <button class="study-tab active" type="button" data-study-view="books">
+              <i data-lucide="book-open-check"></i>
+              Livres
+            </button>
+            <button class="study-tab" type="button" data-study-view="course">
+              <i data-lucide="sparkles"></i>
+              Cours interactif
+            </button>
+          </div>
+        </div>
+
+        <div class="study-searchbar">
+          <label class="search-box">
+            <i data-lucide="search"></i>
+            <input id="bookSearchInput" type="search" placeholder="Rechercher par mot-clé" />
+          </label>
+          <select id="bookSubjectInput" title="Matière">
+            <option value="">Toutes les matières</option>
+          </select>
+          <select id="bookResourceInput" title="Ressource">
+            <option value="">Tout le contenu</option>
+            <option value="pdf">PDF</option>
+            <option value="summary">Résumé</option>
+            <option value="exercise">Exercices</option>
+            <option value="video">Vidéos</option>
+          </select>
+        </div>
+
+        <nav class="study-breadcrumb" id="studyBreadcrumb" aria-label="Navigation"></nav>
+
+        <section class="chapter-picker" id="chapterPicker" aria-label="Page de chapitre">
+          <div class="panel-title">
+            <i data-lucide="list-tree"></i>
+            <h2 id="chapterPickerTitle">Page de chapitre</h2>
+          </div>
+          <div class="chapter-controls">
+            <label>
+              Livre
+              <select id="chapterBookInput"></select>
+            </label>
+            <label>
+              Chapitre
+              <select id="chapterInput"></select>
+            </label>
+          </div>
+          <article class="chapter-detail" id="chapterDetail"></article>
+        </section>
+
+        <div class="study-view" id="booksView">
+          <div class="book-grid" id="bookGrid" aria-live="polite"></div>
+          <div class="empty-state compact" id="bookEmptyState">
+            <i data-lucide="search-x"></i>
+            <h2>Aucun résultat</h2>
+            <p>Essaie un autre mot-clé ou une autre matière.</p>
+          </div>
+        </div>
+
+        <div class="study-view course-view" id="courseView" hidden>
+          <div class="course-layout">
+            <div class="course-menu" id="courseMenu" aria-label="Cours interactifs"></div>
+            <article class="course-detail" id="courseDetail"></article>
+          </div>
+        </div>
+      </section>
+
+      <section class="subject-page" id="subjectPage" hidden>
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow-light">Page de matière</p>
+            <h2 id="subjectPageTitle">Matière</h2>
+          </div>
+          <div class="subject-actions">
+            <button class="secondary-button" id="importWordButton" type="button">
+              <i data-lucide="file-up"></i>
+              Ajouter une feuille Word
+            </button>
+            <button class="secondary-button" id="closeSubjectPage" type="button">
+              <i data-lucide="x"></i>
+              Fermer
+            </button>
+          </div>
+        </div>
+
+        <input
+          id="wordImportInput"
+          type="file"
+          accept=".doc,.docx,.odt,.rtf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          multiple
+          hidden
+        />
+
+        <div class="subject-official-content" id="subjectOfficialContent"></div>
+
+        <form class="sheet-creator" id="sheetForm">
+          <div class="panel-title">
+            <i data-lucide="file-pen-line"></i>
+            <h2>Créer une feuille</h2>
+          </div>
+
+          <div class="form-grid">
+            <label>
+              Titre
+              <input id="sheetTitleInput" type="text" placeholder="Ex: Résumé du chapitre" />
+            </label>
+            <label>
+              Leçon
+              <input id="sheetLessonInput" type="text" placeholder="Ex: Leçon 2" />
+            </label>
+          </div>
+
+          <div class="editor-toolbar" aria-label="Outils de texte">
+            <button type="button" data-command="bold" title="Gras"><i data-lucide="bold"></i></button>
+            <button type="button" data-command="italic" title="Italique"><i data-lucide="italic"></i></button>
+            <button type="button" data-command="underline" title="Souligner"><i data-lucide="underline"></i></button>
+            <button type="button" data-command="insertUnorderedList" title="Liste"><i data-lucide="list"></i></button>
+            <button type="button" data-command="formatBlock" data-value="h2" title="Titre"><i data-lucide="heading-2"></i></button>
+          </div>
+
+          <div class="word-editor" id="sheetEditor" contenteditable="true" aria-label="Contenu de la feuille"></div>
+
+          <button class="primary-button" type="submit">
+            <i data-lucide="save"></i>
+            Enregistrer la feuille
+          </button>
+        </form>
+      </section>
+
+      <section class="workspace" id="documentLibrary">
+        <form class="upload-panel" id="uploadForm">
+          <div class="panel-title">
+            <i data-lucide="folder-plus"></i>
+            <h2>Ajouter un document</h2>
+          </div>
+
+          <label class="drop-zone" id="dropZone" for="fileInput">
+            <input id="fileInput" name="files" type="file" multiple />
+            <i data-lucide="upload-cloud"></i>
+            <strong>Choisir des fichiers</strong>
+            <span>PDF, images, Word, PowerPoint, audio...</span>
+          </label>
+
+          <div class="selected-files" id="selectedFiles" aria-live="polite"></div>
+
+          <div class="form-grid">
+            <label>
+              Titre du cours
+              <input id="titleInput" type="text" placeholder="Ex: Fonctions dérivées" />
+            </label>
+            <label>
+              Matière
+              <div class="subject-control">
+                <select id="subjectInput"></select>
+                <button class="subject-add-button" id="addSubjectButton" type="button" title="Ajouter une matière">
+                  <i data-lucide="plus"></i>
+                  Nouvelle
+                </button>
+              </div>
+            </label>
+            <label>
+              Leçon
+              <input id="lessonInput" type="text" placeholder="Ex: Leçon 3" />
+            </label>
+            <label>
+              Type
+              <select id="typeInput">
+                <option>Cours</option>
+                <option>Exercice</option>
+                <option>Correction</option>
+                <option>Devoir</option>
+                <option>Résumé</option>
+                <option>Examen</option>
+                <option>Fiche</option>
+                <option>Autre</option>
+              </select>
+            </label>
+            <label>
+              Année
+              <input id="yearInput" type="text" value="2026" />
+            </label>
+            <label class="full-span">
+              Mots-clés
+              <input id="tagsInput" type="text" placeholder="Ex: fonctions, dérivée, graphique" />
+            </label>
+            <label class="full-span">
+              Résumé ou note
+              <textarea id="noteInput" rows="3" placeholder="Quelques lignes pour retrouver ce document"></textarea>
+            </label>
+          </div>
+
+          <button class="primary-button" type="submit">
+            <i data-lucide="save"></i>
+            Enregistrer
+          </button>
+        </form>
+
+        <section class="library-panel">
+          <div class="panel-title library-title">
+            <i data-lucide="library"></i>
+            <h2>Mes cours</h2>
+          </div>
+          <div class="library-toolbar">
+            <label class="search-box">
+              <i data-lucide="search"></i>
+              <input id="searchInput" type="search" placeholder="Rechercher" />
+            </label>
+            <select id="subjectFilter" title="Matière">
+              <option value="">Toutes les matières</option>
+            </select>
+            <select id="typeFilter" title="Type">
+              <option value="">Tous les types</option>
+            </select>
+            <select id="sortInput" title="Tri">
+              <option value="newest">Plus récents</option>
+              <option value="oldest">Plus anciens</option>
+              <option value="title">Titre A-Z</option>
+              <option value="subject">Matière A-Z</option>
+              <option value="size">Taille</option>
+            </select>
+          </div>
+
+          <div class="document-grid" id="documentGrid" aria-live="polite"></div>
+
+          <div class="empty-state" id="emptyState">
+            <i data-lucide="files"></i>
+            <h2>Aucun document</h2>
+            <p>Ajoute tes cours, exercices et corrections.</p>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="confirmDialog">
+      <form method="dialog" class="dialog-card">
+        <i data-lucide="trash-2"></i>
+        <h2>Supprimer ce document ?</h2>
+        <p id="deleteTarget"></p>
+        <div class="dialog-actions">
+          <button value="cancel" type="submit">Annuler</button>
+          <button class="danger-button" value="delete" type="submit">Supprimer</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="subjectDialog">
+      <form method="dialog" class="dialog-card" id="subjectForm">
+        <i data-lucide="book-plus"></i>
+        <h2>Nouvelle matière</h2>
+        <label>
+          Nom
+          <input id="newSubjectInput" type="text" placeholder="Ex: Anglais" />
+        </label>
+        <div class="dialog-actions">
+          <button value="cancel" type="submit">Annuler</button>
+          <button class="primary-button" value="add" type="submit">Ajouter</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="deleteSubjectDialog">
+      <form method="dialog" class="dialog-card" id="deleteSubjectForm">
+        <i data-lucide="trash-2"></i>
+        <h2>Supprimer une matière</h2>
+        <label>
+          Matière
+          <select id="deleteSubjectInput"></select>
+        </label>
+        <p>Les documents déjà ajoutés ne seront pas supprimés.</p>
+        <div class="dialog-actions">
+          <button value="cancel" type="submit">Annuler</button>
+          <button class="danger-button" value="delete-subject" type="submit">Supprimer</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
